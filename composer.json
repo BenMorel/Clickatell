@@ -1,0 +1,25 @@
+{
+  "name": "BenMorel/Clickatell",
+  "description": "Client library for the Clickatell SMS gateway",
+  "type": "library",
+  "keywords": [
+    "Clickatell",
+    "SMS"
+  ],
+  "license": "MIT",
+  "require": {
+    "php": ">=5.5",
+    "ext-mbstring": "*",
+    "guzzlehttp/guzzle": "6.*"
+  },
+  "require-dev": {
+    "phpunit/phpunit": "*",
+    "satooshi/php-coveralls": "dev-master"
+  },
+  "autoload": {
+    "psr-4": {
+      "Clickatell\\": "src/",
+      "Clickatell\\Tests\\": "tests/"
+    }
+  }
+}
