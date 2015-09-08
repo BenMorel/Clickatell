@@ -1,5 +1,5 @@
 {
-  "name": "BenMorel/Clickatell",
+  "name": "benmorel/clickatell",
   "description": "Client library for the Clickatell SMS gateway",
   "type": "library",
   "keywords": [
