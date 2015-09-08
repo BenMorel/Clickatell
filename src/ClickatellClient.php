@@ -52,9 +52,9 @@ class ClickatellClient
     /**
      * The GSM charset converter.
      *
-     * @var CharsetConverter
+     * @var MessageConverter
      */
-    private $charsetConverter;
+    private $messageConverter;
 
     /**
      * The Clickatell session id, or null if not yet authenticated.
@@ -79,7 +79,7 @@ class ClickatellClient
         $this->defaultSenderId = $defaultSenderId;
 
         $this->client = new Client();
-        $this->charsetConverter = new CharsetConverter();
+        $this->messageConverter = new MessageConverter();
     }
 
     /**
@@ -153,20 +153,14 @@ class ClickatellClient
             throw new ClickatellException('Invalid phone number.');
         }
 
-        if (! mb_check_encoding($message, 'UTF-8')) {
-            throw new ClickatellException('The message must be in UTF-8 format.');
-        }
-
-        // Convert the message to UCS-2 big endian.
-        $message = mb_convert_encoding($message, 'UCS-2BE', 'UTF-8');
-
-        // Attempt to convert the message to the GSM charset.
-        $gsmCharsetMessage= $this->charsetConverter->convert($message);
+        $message = $this->messageConverter->convert($message);
 
         $parameters = [
             'session_id' => $this->sessionId,
             'to'         => $number,
-            'concat'     => 10 // Maximum number of messages allowed.
+            'unicode'    => $message->isUnicode ? '1' : '0',
+            'text'       => $message->data,
+            'concat'     => 10, // Maximum number of messages allowed.
         ];
 
         if ($sender === null) {
@@ -177,16 +171,7 @@ class ClickatellClient
             $parameters['from'] = $sender;
         }
 
-        if ($gsmCharsetMessage !== null) {
-            // The conversion succeeded, send in the GSM format.
-            $parameters['unicode'] = '0';
-            $parameters['text'] = $gsmCharsetMessage;
-        }
-        else {
-            // The conversion failed, send in the Unicode format, hex-encoded.
-            $parameters['unicode'] = '1';
-            $parameters['text'] = bin2hex($message);
-        }
+        var_export($parameters);
 
         $response = $this->post(self::SENDMSG_ENDPOINT, $parameters);
 
