@@ -171,8 +171,6 @@ class ClickatellClient
             $parameters['from'] = $sender;
         }
 
-        var_export($parameters);
-
         $response = $this->post(self::SENDMSG_ENDPOINT, $parameters);
 
         if (preg_match('/^ID: (\S+)/', $response, $matches) == 0) {
