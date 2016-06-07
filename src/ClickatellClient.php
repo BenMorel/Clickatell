@@ -11,7 +11,6 @@ use GuzzleHttp\RequestOptions;
  */
 class ClickatellClient
 {
-    const AUTH_ENDPOINT    = 'https://api.clickatell.com/http/auth';
     const SENDMSG_ENDPOINT = 'https://api.clickatell.com/http/sendmsg';
 
     /**
@@ -36,13 +35,6 @@ class ClickatellClient
     private $password;
 
     /**
-     * A default sender id, or null if not provided.
-     *
-     * @var string|null
-     */
-    private $defaultSenderId;
-
-    /**
      * The Guzzle HTTP client.
      *
      * @var \GuzzleHttp\Client
@@ -57,26 +49,17 @@ class ClickatellClient
     private $messageConverter;
 
     /**
-     * The Clickatell session id, or null if not yet authenticated.
-     *
-     * @var string|null
-     */
-    private $sessionId = null;
-
-    /**
      * Class constructor.
      *
-     * @param string      $apiId           The Clickatell API id.
-     * @param string      $username        The Clickatell username.
-     * @param string      $password        The Clickatell password.
-     * @param string|null $defaultSenderId A default sender id (optional).
+     * @param string $apiId    The Clickatell API id.
+     * @param string $username The Clickatell username.
+     * @param string $password The Clickatell password.
      */
-    public function __construct($apiId, $username, $password, $defaultSenderId = null)
+    public function __construct($apiId, $username, $password)
     {
-        $this->apiId = $apiId;
+        $this->apiId    = $apiId;
         $this->username = $username;
         $this->password = $password;
-        $this->defaultSenderId = $defaultSenderId;
 
         $this->client = new Client();
         $this->messageConverter = new MessageConverter();
@@ -107,48 +90,18 @@ class ClickatellClient
     }
 
     /**
-     * Authenticates with the Clickatell API.
-     *
-     * This needs to be called only once before any number of send() calls.
-     * This should be called again after any pause has been done,
-     * to avoid the risk of using an expired session (such as between multiple batch job runs).
-     *
-     * @return void
-     *
-     * @throws \Clickatell\ClickatellException
-     */
-    public function authenticate()
-    {
-        $response = $this->post(self::AUTH_ENDPOINT, [
-            'api_id'   => $this->apiId,
-            'user'     => $this->username,
-            'password' => $this->password
-        ]);
-
-        if (preg_match('/^OK: (\S+)/', $response, $matches) == 0) {
-            throw new ClickatellException('Invalid auth response: ' . $response);
-        }
-
-        $this->sessionId = $matches[1];
-    }
-
-    /**
      * Sends a SMS on the Clickatell API.
      *
-     * @param string      $number  The phone number, in international format, without the leading +.
-     * @param string      $message The text message, in UTF-8 format.
-     * @param string|null $sender  The Sender ID, or null to use the default.
+     * @param string $number  The phone number, in international format, without the leading +.
+     * @param string $message The text message, in UTF-8 format.
+     * @param array  $options Additional options: from, callback, concat, ...
      *
      * @return string The message ID.
      *
      * @throws \Clickatell\ClickatellException
      */
-    public function send($number, $message, $sender = null)
+    public function send($number, $message, array $options = [])
     {
-        if ($this->sessionId === null) {
-            throw new ClickatellException('You need to authenticate() before send()ing a message.');
-        }
-
         if (! ctype_digit($number)) {
             throw new ClickatellException('Invalid phone number.');
         }
@@ -156,20 +109,15 @@ class ClickatellClient
         $message = $this->messageConverter->convert($message);
 
         $parameters = [
-            'session_id' => $this->sessionId,
-            'to'         => $number,
-            'unicode'    => $message->isUnicode ? '1' : '0',
-            'text'       => $message->data,
-            'concat'     => 10, // Maximum number of messages allowed.
+            'api_id'   => $this->apiId,
+            'user'     => $this->username,
+            'password' => $this->password,
+            'to'       => $number,
+            'unicode'  => $message->isUnicode ? '1' : '0',
+            'text'     => $message->data,
         ];
 
-        if ($sender === null) {
-            $sender = $this->defaultSenderId;
-        }
-
-        if ($sender !== null) {
-            $parameters['from'] = $sender;
-        }
+        $parameters += $options;
 
         $response = $this->post(self::SENDMSG_ENDPOINT, $parameters);
 
