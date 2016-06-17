@@ -7,4 +7,13 @@ namespace Clickatell;
  */
 class ClickatellException extends \Exception
 {
+    /**
+     * Returns the 3-digit Clickatell error code.
+     *
+     * @return string
+     */
+    public function getClickatellErrorCode()
+    {
+        return sprintf('%03u', $this->getCode());
+    }
 }

@@ -122,7 +122,11 @@ class ClickatellClient
         $response = $this->post(self::SENDMSG_ENDPOINT, $parameters);
 
         if (preg_match('/^ID: (\S+)/', $response, $matches) == 0) {
-            throw new ClickatellException('Invalid sendmsg response: ' . $response);
+            if (preg_match('/^ERR: ([0-9]+), (.+)/', $response, $matches) == 0) {
+                throw new ClickatellException('Invalid sendmsg response: ' . $response);
+            }
+
+            throw new ClickatellException($matches[2], $matches[1]);
         }
 
         return $matches[1];
