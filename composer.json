@@ -12,10 +12,6 @@
     "ext-mbstring": "*",
     "guzzlehttp/guzzle": "6.*"
   },
-  "require-dev": {
-    "phpunit/phpunit": "*",
-    "satooshi/php-coveralls": "dev-master"
-  },
   "autoload": {
     "psr-4": {
       "Clickatell\\": "src/",
