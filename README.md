@@ -10,9 +10,11 @@ This guarantees a perfect delivery of the original message, while minimizing cre
 
 ## Basic usage
 
-    $client = new Clickatell\ClickatellClient('api-id', 'username', 'password');
-    $client->authenticate();
-    $client->send('441234567890', 'Hello world');
+```php
+$client = new Clickatell\ClickatellClient('api-id', 'username', 'password');
+$client->authenticate();
+$client->send('441234567890', 'Hello world');
+```
 
 The `authenticate()` call is required *once*, whether you need to `send()` one or several SMS messages.
 
@@ -25,8 +27,12 @@ The message must use the UTF-8 charset.
 
 If you registered a sender ID with Clickatell, you can specify it when instantiating the library:
 
-    $client = new Clickatell\ClickatellClient('api-id', 'username', 'password', 'sender-id');
+```php
+$client = new Clickatell\ClickatellClient('api-id', 'username', 'password', 'sender-id');
+```
 
 It will then automatically be used for every `send()` call. Alternatively, you can pass it to every call individually:
 
-    $client->send('441234567890', 'Hello world', 'sender-id');
+```php
+$client->send('441234567890', 'Hello world', 'sender-id');
+```
