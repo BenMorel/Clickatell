@@ -14,8 +14,7 @@
   },
   "autoload": {
     "psr-4": {
-      "Clickatell\\": "src/",
-      "Clickatell\\Tests\\": "tests/"
+      "Clickatell\\": "src/"
     }
   }
 }
