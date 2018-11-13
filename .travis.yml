@@ -1,0 +1,17 @@
+language: php
+
+php:
+  - 7.1
+  - 7.2
+  - nightly
+
+allow_failures:
+  - php: nightly
+
+script:
+  - composer install
+  - mkdir -p build/logs
+  - vendor/bin/phpunit --coverage-clover build/logs/clover.xml
+
+after_script:
+  - vendor/bin/php-coveralls -v
